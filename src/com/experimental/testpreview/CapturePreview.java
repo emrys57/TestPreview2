@@ -1,18 +1,13 @@
 package com.experimental.testpreview;
-import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.media.MediaRecorder;
-import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -156,97 +151,6 @@ private void initialiseSurfaceHolder() {
     mHolder.addCallback(this);
     mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated, but doesn't work if I take it out
 }
-// --------------------------------------------------------------------
-// old unused code below here. Chunks were cut out of this to send to stackoverflow
 
-public void surfaceCreatedOld(SurfaceHolder holder) {
-	// The Surface has been created, acquire the camera and tell it where
-	// to draw.
-	Log.d(TAG, "Connecting to camera");
-	mCamera = Camera.open();
-	Log.d(TAG, "Opened camera");
-	try {
-		Camera.Parameters parameters = mCamera.getParameters();
-		if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
-			// This is an undocumented although widely known feature
-			// from http://stackoverflow.com/questions/8603249/android-camera-with-surface-view-potrait?rq=1
-			Log.d(TAG, "setting portrait orientation");
-			mCamera.setDisplayOrientation(90);
-		} else {
-			// This is an undocumented although widely known feature
-			Log.d(TAG, "setting landscape orientation");
-			parameters.set("orientation", "landscape");
-			mCamera.setDisplayOrientation(0);
-		}
-
-		mCamera.setParameters(parameters);
-		mCamera.setPreviewDisplay(holder);
-		mCamera.setPreviewCallback(new PreviewCallback() {
-
-			public void onPreviewFrame(byte[] data, Camera arg1) {
-				Log.d(TAG, String.format("Frame %d", mFrameNumber));
-				mFrameNumber++;
-
-			}
-		});
-	} catch (IOException exception) {
-		mCamera.release();
-		mCamera = null;
-		// TODO: add more exception handling logic here
-	}
-}
-
-public void surfaceChangedOld(SurfaceHolder holder, int format, int w, int h) {
-	// Now that the size is known, set up the camera parameters and begin
-	// the preview.
-	Camera.Parameters parameters = mCamera.getParameters();
-	List<Size> previewSizes = parameters.getSupportedPreviewSizes();
-	Size mPreviewSize = getOptimalPreviewSize(previewSizes, w, h);
-	int w2 = mPreviewSize.width;
-	int h2 = mPreviewSize.height;
-	Log.d(TAG, String.format("surfaceChanged called want w=%d h=%d using w=%d h=%d", w, h, w2, h2));
-	parameters.setPreviewSize(w2, h2);
-	parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO); 
-	mCamera.setParameters(parameters);
-	mCamera.startPreview();
-	startVideo(mCamera, holder);
-}
-
-private void startVideoOld(Camera camera, SurfaceHolder holder) {
-	camera.stopPreview(); // not specified in documentation but seems to be needed
-	camera.unlock();
-	mMediaRecorder = new MediaRecorder();
-	mMediaRecorder.setCamera(camera);
-	mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA); // No audio is recorded
-	mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-	mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
-//	File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-//			Environment.DIRECTORY_PICTURES), "EmrysTestDirectory");
-//	if (! mediaStorageDir.exists()){
-//		if (! mediaStorageDir.mkdirs()){
-//			Log.d("EmrysTestDirectory", "failed to create directory");
-//			return;
-//		}
-//	}
-//	String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//	File mediaFile;
-//	mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-//			"VID_"+ timeStamp + ".mp4");
-//	mMediaRecorder.setOutputFile(mediaFile.toString());
-	mMediaRecorder.setOutputFile("/dev/null");
-	try {
-		mMediaRecorder.setPreviewDisplay(holder.getSurface());
-		mMediaRecorder.prepare();
-	} catch (IOException e) {
-		camera.release();
-		Log.d(TAG, "startVideo: Failed.");
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	mMediaRecorder.start();
-}
-private void startVideo2(Camera camera, SurfaceHolder holder) {
-	return;
-}
 }
 

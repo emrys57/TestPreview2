@@ -7,7 +7,7 @@ import android.view.Menu;
 
 public class MainActivity extends Activity {
 
-	private CapturePreview mPreview;
+	private CapturePreview mPreview;  // why does eclipse say this is unused?
 
 	/** Called when the activity is first created. */
 	@Override
